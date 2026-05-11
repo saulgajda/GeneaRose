@@ -7,8 +7,11 @@ try:
 except ImportError:
     yaml = None
 
-
-RADIAL_FROM_GENERATION = 6   # od tego pokolenia tekst idzie wzdłuż promienia
+# Starting from this generation the names 
+# will be drawn on the radius not on the arc
+# We count generactions backward so:
+# 0 = central person, 1 = parents, 2 = grandparents
+RADIAL_FROM_GENERATION = 6
 RING_WIDTH = 90
 CENTER_RADIUS = 80
 PADDING = 20
@@ -20,7 +23,7 @@ def load_tree(path):
     text = Path(path).read_text(encoding="utf-8")
     if path.endswith((".yml", ".yaml")):
         if yaml is None:
-            raise RuntimeError("Zainstaluj PyYAML: pip install pyyaml")
+            raise RuntimeError("Install PyYAML: pip install pyyaml")
         return yaml.safe_load(text)
     return json.loads(text)
 
@@ -242,7 +245,7 @@ def generate_svg(root):
 
 def main():
     if len(sys.argv) != 3:
-        print("Użycie: python genealogy_rosette.py input.json|input.yml output.svg")
+        print("Usage: python genearose.py input.yml output.svg")
         sys.exit(1)
 
     root = load_tree(sys.argv[1])
