@@ -84,19 +84,32 @@ def split_name(name, max_chars):
 
 
 def fmt_person(p):
+    lines = []
+    
     name = p.get("name", "")
 
-    birth = '*' + str(p["birth"]) if p.get("birth") else ""
-    death = '✝︎' + str(p["death"]) if p.get("death") else ""
+    lines.append(name)
 
-    if birth and death:
-        return f"{name} {birth} {death}"
-    if birth:
-        return f"{name} {birth}"
-    if death:
-        return f"{name} {death}"
+    dates = []
+    if p.get("birth"):
+        dates.append('*' + str(p["birth"]))
+    if p.get("deth"):
+        dates.append('✝︎' + str(p["death"]))
 
-    return name
+    lines.append(" ".join(dates))
+    return lines
+
+    #birth = '*' + str(p["birth"]) if p.get("birth") else ""
+    #death = '✝︎' + str(p["death"]) if p.get("death") else ""
+
+    #if birth and death:
+    #    return f"{name} {birth} {death}"
+    #if birth:
+    #    return f"{name} {birth}"
+    #if death:
+    #    return f"{name} {death}"
+
+    #return name
 
 
 def polar(cx, cy, r, deg):
@@ -136,10 +149,11 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter):
     if not person:
         return path_counter
 
-    text = fmt_person(person)
+    #text = fmt_person(person)
+    lines = fmt_person(person)
 
     if gen == 0:
-        lines = split_text(text, 18)
+        #lines = split_text(text, 18)
         svg.append(f'<circle cx="{cx}" cy="{cy}" r="{CENTER_RADIUS}" class="root"/>')
         y0 = cy - (len(lines) - 1) * 9
         for i, line in enumerate(lines):
@@ -158,11 +172,12 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter):
 
         if gen < RADIAL_FROM_GENERATION:
             available = math.radians(angle) * rm * 0.82
-            font = font_for(text, available)
-            max_chars = max(6, int(available / (font * 0.55)))
-            lines = split_text(text, max_chars)
+            #font = font_for(text, available)
+            #max_chars = max(6, int(available / (font * 0.55)))
+            #lines = split_text(text, max_chars)
 
             for i, line in enumerate(lines):
+                font = font_for(line, available)
                 # First line/name goes outward, later lines/dates go inward
                 rr = rm + ((len(lines) - 1) / 2 - i) * font * 1.25
                 #rr = rm + (i - (len(lines) - 1) / 2) * font * 1.25
@@ -177,9 +192,9 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter):
                 )
         else:
             available = RING_WIDTH * 0.85
-            font = font_for(text, available)
-            max_chars = max(5, int(available / (font * 0.55)))
-            lines = split_text(text, max_chars)
+            #font = font_for(text, available)
+            #max_chars = max(5, int(available / (font * 0.55)))
+            #lines = split_text(text, max_chars)
 
             x, y = polar(cx, cy, rm, mid)
             rotation = mid
@@ -187,6 +202,7 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter):
                 rotation += 180
 
             for i, line in enumerate(lines):
+                font = font_for(line, available)
                 dy = (i - (len(lines) - 1) / 2) * font * 1.2
                 svg.append(
                     f'<text x="{x:.2f}" y="{y:.2f}" font-size="{font:.1f}" '
