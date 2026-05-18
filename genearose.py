@@ -38,7 +38,7 @@ def split_text(text, max_chars):
     # Expected format: "Name Surname 1900 - 1980"
     date_pos = None
 
-    for sep in [" - ", "–", "-"]:
+    for sep in ["*", "✝︎"]:
         idx = text.find(sep)
         if idx != -1:
             # walk backwards to include the birth date before " - "
@@ -86,15 +86,15 @@ def split_name(name, max_chars):
 def fmt_person(p):
     name = p.get("name", "")
 
-    birth = str(p["birth"]) if p.get("birth") else ""
-    death = str(p["death"]) if p.get("death") else ""
+    birth = '*' + str(p["birth"]) if p.get("birth") else ""
+    death = '✝︎' + str(p["death"]) if p.get("death") else ""
 
     if birth and death:
-        return f"{name} {birth} - {death}"
+        return f"{name} {birth} {death}"
     if birth:
         return f"{name} {birth}"
     if death:
-        return f"{name} - {death}"
+        return f"{name} {death}"
 
     return name
 
