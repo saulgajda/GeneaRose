@@ -245,7 +245,7 @@ def generate_svg(root):
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python genearose.py input.yml output.svg")
+        print("Usage: python genearose.py input.json|input.yml output.svg")
         sys.exit(1)
 
     root = load_tree(sys.argv[1])
