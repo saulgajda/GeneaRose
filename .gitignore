@@ -1,3 +1,6 @@
+*.json
 *.yml
 *.yaml
 *.svg
+
+*~
