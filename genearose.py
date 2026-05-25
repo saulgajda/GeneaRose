@@ -162,13 +162,26 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter):
             max_chars = max(6, int(available / (font * 0.55)))
             lines = split_text(text, max_chars)
 
+            # Check if we are in the bottom half of the circle
+            is_bottom_half = 0 < mid < 180
+
             for i, line in enumerate(lines):
-                # First line/name goes outward, later lines/dates go inward
-                rr = rm + ((len(lines) - 1) / 2 - i) * font * 1.25
-                #rr = rm + (i - (len(lines) - 1) / 2) * font * 1.25
+                if is_bottom_half:
+                    # In bottom half, text is drawn counter-clockwise (a1 to a0).
+                    # Tops of letters point towards the center, so the first line (i = 0)
+                    # should be closer to the center (smaller radius).
+                    rr = rm - ((len(lines) - 1) / 2 - i) * font * 1.25
+                    start_angle, end_angle = a1 - 3, a0 + 3
+                else:
+                    # In top half, text is drawn clockwise (a0 to a1).
+                    # Tops of letters point outwards, so the first line (i = 0)
+                    # should be further from the center (larger radius).
+                    rr = rm + ((len(lines) - 1) / 2 - i) * font * 1.25
+                    start_angle, end_angle = a0 + 3, a1 - 3
+
                 pid = f"p{path_counter}"
                 path_counter += 1
-                defs.append(f'<path id="{pid}" d="{arc_path(cx, cy, rr, a0 + 3, a1 - 3)}"/>')
+                defs.append(f'<path id="{pid}" d="{arc_path(cx, cy, rr, start_angle, end_angle)}"/>')
                 svg.append(
                     f'<text font-size="{font:.1f}">'
                     f'<textPath href="#{pid}" startOffset="50%" text-anchor="middle">'
