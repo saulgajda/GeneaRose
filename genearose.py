@@ -194,6 +194,11 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter):
             max_chars = max(5, int(available / (font * 0.55)))
             lines = split_text(text, max_chars)
 
+            # Only split if the stacked lines fit within the sector's arc width
+            sector_width = math.radians(angle) * rm
+            if len(lines) > 1 and (len(lines) * font * 1.2) > sector_width:
+                lines = [text]
+
             x, y = polar(cx, cy, rm, mid)
             rotation = mid
             if 90 < rotation < 270:
