@@ -23,6 +23,20 @@ PADDING = 20
 MAX_FONT = 16
 MIN_FONT = 7
 
+FONT_SIZES = [
+    16,
+    16,
+    15,
+    14,
+    13,
+    12,
+    11,
+    10,
+    9,
+    8,
+    7,
+    6,
+]
 
 def load_tree(path):
     text = Path(path).read_text(encoding="utf-8")
@@ -109,7 +123,8 @@ def split_name(name, max_chars):
 
 def fmt_person(p):
     name = p.get("name", "")
-
+    print("name: " + name)
+    
     birth = '*' + str(p["birth"]) if p.get("birth") else ""
     death = '✝︎' + str(p["death"]) if p.get("death") else ""
 
@@ -151,7 +166,8 @@ def sector_path(cx, cy, r0, r1, a0, a1):
     )
 
 
-def font_for(text, available):
+def font_for(text, available, gen):
+    return FONT_SIZES[gen]
     if not text:
         return MAX_FONT
     length = len(text) if not isinstance(text, int) else text
@@ -209,11 +225,11 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter, max_gene
         # Only render text if person exists
         if person and gen < RADIAL_FROM_GENERATION:
             available = math.radians(angle) * rm * (0.98 if gen >= 4 else 0.92)
-            font = font_for(name, available)
+            font = font_for(name, available, gen)
             max_chars = max(6, int(available / (font * 0.55)))
             lines = split_name(name, max_chars)
             max_line = max(len(line) for line in lines)
-            font = font_for(max_line, available)
+            font = font_for(max_line, available, gen)
             # print(f"Max chars for gen {gen} is {max_chars}")
             
             # For generations before DATES_SAME_LINE_FROM_GENERATION, always put dates on separate line
@@ -260,7 +276,7 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter, max_gene
                 if len(alt) > 1:
                     lines = alt
                     max_line = max(len(line) for line in lines)
-                    font = font_for(max_line, available)
+                    font = font_for(max_line, available, gen)
 
             # compute sector (arc) width to estimate if text will overflow visually
             sector_width = math.radians(angle) * rm
@@ -284,7 +300,7 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter, max_gene
                             alt = alt[:2] + [alt[2] + ' ' + dates] if len(alt) >= 3 else alt + [dates]
                     lines = alt
                     max_line = max(len(line) for line in lines)
-                    font = font_for(max_line, available)
+                    font = font_for(max_line, available, gen)
             for i, line in enumerate(lines):
                 if is_bottom_half:
                     # In bottom half, text is drawn counter-clockwise (a1 to a0).
@@ -312,7 +328,7 @@ def render_person(svg, defs, person, gen, a0, a1, cx, cy, path_counter, max_gene
             # Radial text for deeper generations - only render if person exists
             if person:
                 available = RING_WIDTH * 0.95
-                font = font_for(name, available)
+                font = font_for(name, available, gen)
                 max_chars = max(5, int(available / (font * 0.55)))
                 lines = split_text(name, max_chars)
                 
@@ -376,22 +392,24 @@ def generate_svg(root):
         fill: #222;
     }}
     .root {{
-        fill: #f7f7f7;
+        //fill: #f7f7f7;
+        fill: #ffffff;
         stroke: #333;
-        stroke-width: 1.5;
+        stroke-width: 2;
     }}
     .sector {{
-        fill: #f7f7f7;
+        // fill: #f7f7f7;
+        fill: #ffffff;
         stroke: #bbb;
-        stroke-width: 1;
+        stroke-width: 1.5;
     }}
 </style>
 ''')
 
-    render_person(svg, defs, root, 0, 0, 360, cx, cy, 0, depth)
+    render_person(svg, defs, root, 0, 0, 360, cx, cy, 0, depth - 1)
 
     # Add a margin circle at 1/3 sector width beyond the last sector
-    svg.append(f'<circle cx="{cx}" cy="{cy}" r="{margin_radius:.2f}" fill="none" stroke="#ccc" stroke-width="1"/>')
+    # svg.append(f'<circle cx="{cx}" cy="{cy}" r="{margin_radius:.2f}" fill="none" stroke="#ccc" stroke-width="1"/>')
 
     if defs:
         svg.insert(1, "<defs>\n" + "\n".join(defs) + "\n</defs>")
